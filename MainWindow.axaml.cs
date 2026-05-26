@@ -56,7 +56,7 @@ namespace BookGuiSystem
                 }
                 catch { }
             }
-            return "server=localhost;database=BookDB;uid=usman;pwd=BookManager@2026!;AllowPublicKeyRetrieval=True;SslMode=Disabled;";
+            return "server=localhost;database=BookDB;uid=YOUR_DB_USER;pwd=YOUR_DB_PASSWORD;AllowPublicKeyRetrieval=True;SslMode=Disabled;";
         }
 
         private void InitializeComponent()
