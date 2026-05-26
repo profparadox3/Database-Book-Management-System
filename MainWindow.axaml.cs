@@ -30,9 +30,51 @@ namespace BookGuiSystem
         public MainWindow()
         {
             connString = LoadConnectionString();
+            EnsureDatabaseSetup(); // Automatically bootstraps BookDB and Books table if they don't exist
             InitializeComponent();
             WireUpEvents();
             LoadData(); // Automatically loads existing records on startup
+        }
+
+        /// <summary>
+        /// Automatically bootstraps the database and table if they do not exist on the host system.
+        /// </summary>
+        private void EnsureDatabaseSetup()
+        {
+            // Connect to MySQL server directly (without selecting BookDB yet)
+            string masterConnString = connString.Replace("database=BookDB;", "");
+            
+            using (MySqlConnection conn = new MySqlConnection(masterConnString))
+            {
+                try
+                {
+                    conn.Open();
+                    
+                    // Create database if not exists
+                    using (MySqlCommand cmd = new MySqlCommand("CREATE DATABASE IF NOT EXISTS BookDB;", conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    // Create table if not exists
+                    string createTableQuery = @"
+                        CREATE TABLE IF NOT EXISTS BookDB.Books (
+                            book_id INT AUTO_INCREMENT PRIMARY KEY,
+                            book_title VARCHAR(100) NOT NULL,
+                            author VARCHAR(50),
+                            price DECIMAL(10,2),
+                            genre VARCHAR(30)
+                        );";
+                    using (MySqlCommand cmd = new MySqlCommand(createTableQuery, conn))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                catch (Exception)
+                {
+                    // Fail silently, LoadData() will catch and show the database connection errors on UI
+                }
+            }
         }
 
         /// <summary>
